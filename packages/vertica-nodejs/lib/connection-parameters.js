@@ -47,6 +47,7 @@ var add = function (params, config, paramName) {
 
 class ConnectionParameters {
   constructor(config) {
+    console.log("Config: " + config)
     // if a string is passed, it is a raw connection string so we parse it into a config
     config = typeof config === 'string' ? parse(config) : config || {}
 
