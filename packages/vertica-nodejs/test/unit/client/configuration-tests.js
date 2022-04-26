@@ -96,7 +96,7 @@ test('initializing from a config string', function () {
     assert.equal(client.database, process.env['V_DATABASE'] || process.env.USER)
   })
 
-  test('when not including all values the environment variables are used', function () {
+  test('when not including all values, the environment variables are used', function () {
     var envUserDefined = process.env['V_USER'] !== undefined
     var envPasswordDefined = process.env['V_PASSWORD'] !== undefined
     var envDBDefined = process.env['V_DATABASE'] !== undefined
@@ -115,8 +115,8 @@ test('initializing from a config string', function () {
     process.env['V_HOST'] = 'utHost1'
     process.env['V_PORT'] = 5464
 
-    console.log("Creating client from light connection string")
     var client = new Client('postgres://host1')
+
     assert.equal(client.user, process.env['V_USER'])
     assert.equal(client.password, process.env['V_PASSWORD'])
     assert.equal(client.host, 'host1')

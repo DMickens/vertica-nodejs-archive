@@ -8,7 +8,7 @@ var parse = require('v-connection-string').parse // parses a connection string
 
 var val = function (key, config, envVar) {
   if (envVar === undefined) {
-    envVar = process.env['PG' + key.toUpperCase()]
+    envVar = process.env['V_' + key.toUpperCase()]
   } else if (envVar === false) {
     // do nothing ... use false
   } else {
@@ -47,7 +47,6 @@ var add = function (params, config, paramName) {
 
 class ConnectionParameters {
   constructor(config) {
-    console.log("Config: " + config)
     // if a string is passed, it is a raw connection string so we parse it into a config
     config = typeof config === 'string' ? parse(config) : config || {}
 
