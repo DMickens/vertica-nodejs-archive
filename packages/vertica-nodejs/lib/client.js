@@ -15,7 +15,7 @@ var Connection = require('./connection')
 class Client extends EventEmitter {
   constructor(config) {
     super()
-    
+
     this.connectionParameters = new ConnectionParameters(config)
     this.user = this.connectionParameters.user
     this.database = this.connectionParameters.database
