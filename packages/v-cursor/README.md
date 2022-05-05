@@ -1,4 +1,4 @@
-# v-pool
+# v-cursor
 
 <!-- refer back to original node-postgres for samples once compatibility with Vertica is ensured -->
 
