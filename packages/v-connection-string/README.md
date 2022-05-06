@@ -22,7 +22,17 @@ Each package in this repo should have its own readme more focused on how to deve
     To use vertica-nodejs linked locally from source (not recommended in production): ``` TO DO - Take notes from http://confluence.verticacorp.com/display/DEV/Node.js+Development+Resources```
 
 -->
+## Usage
 
+var parse = require('pg-connection-string').parse;
+var config = parse('vertica://someuser:somepassword@somehost:381/somedatabase')
+
+The resulting config contains a subset of the following properties:
+* `host` - Vertica server hostname 
+* `port` - port on which to connect
+* `user` - User with which to authenticate to the server
+* `password` - Corresponding password
+* `database` - Database name within the server
 ### Features
 
 - Pure JavaScript client and native libpq bindings share _the same API_
