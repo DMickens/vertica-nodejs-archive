@@ -200,6 +200,7 @@ class Client extends EventEmitter {
     con.on('copyInResponse', this._handleCopyInResponse.bind(this))
     con.on('copyData', this._handleCopyData.bind(this))
     con.on('notification', this._handleNotification.bind(this))
+    // if you want to add a handler for parameter status messages, you can probably start here. 
   }
 
   // TODO(bmc): deprecate pgpass "built in" integration since this.password can be a function
