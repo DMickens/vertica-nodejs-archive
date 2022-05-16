@@ -33,6 +33,8 @@ class Client extends EventEmitter {
 
     this.replication = this.connectionParameters.replication
 
+    this.client_label = this.connectionParameters.client_label;
+
     var c = config || {}
 
     this._Promise = c.Promise || global.Promise
@@ -51,6 +53,7 @@ class Client extends EventEmitter {
         keepAlive: c.keepAlive || false,
         keepAliveInitialDelayMillis: c.keepAliveInitialDelayMillis || 0,
         encoding: this.connectionParameters.client_encoding || 'utf8',
+        client_label: this.client_label,
       })
     this.queryQueue = []
     this.binary = c.binary || defaults.binary
@@ -67,6 +70,7 @@ class Client extends EventEmitter {
     }
 
     this._connectionTimeoutMillis = c.connectionTimeoutMillis || 0
+
   }
 
   _errorAllQueries(err) {
@@ -408,6 +412,10 @@ class Client extends EventEmitter {
     }
     if (params.options) {
       data.options = params.options
+    }
+
+    if (params.client_label) {
+      data.client_label = params.client_label
     }
 
     return data

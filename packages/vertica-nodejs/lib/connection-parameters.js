@@ -49,7 +49,7 @@ class ConnectionParameters {
   constructor(config) {
     // if a string is passed, it is a raw connection string so we parse it into a config
     config = typeof config === 'string' ? parse(config) : config || {}
-
+    
     // if the config has a connectionString defined, parse IT into the config we use
     // this will override other default values with what is stored in connectionString
     if (config.connectionString) {
@@ -105,6 +105,8 @@ class ConnectionParameters {
     this.statement_timeout = val('statement_timeout', config, false)
     this.idle_in_transaction_session_timeout = val('idle_in_transaction_session_timeout', config, false)
     this.query_timeout = val('query_timeout', config, false)
+
+    this.client_label = val('client_label', config, false)
 
     if (config.connectionTimeoutMillis === undefined) {
       this.connect_timeout = process.env.PGCONNECT_TIMEOUT || 0
