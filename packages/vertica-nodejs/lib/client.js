@@ -70,7 +70,6 @@ class Client extends EventEmitter {
     }
 
     this._connectionTimeoutMillis = c.connectionTimeoutMillis || 0
-
   }
 
   _errorAllQueries(err) {

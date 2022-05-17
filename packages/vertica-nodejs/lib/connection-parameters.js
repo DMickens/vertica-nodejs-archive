@@ -49,7 +49,7 @@ class ConnectionParameters {
   constructor(config) {
     // if a string is passed, it is a raw connection string so we parse it into a config
     config = typeof config === 'string' ? parse(config) : config || {}
-    
+
     // if the config has a connectionString defined, parse IT into the config we use
     // this will override other default values with what is stored in connectionString
     if (config.connectionString) {
