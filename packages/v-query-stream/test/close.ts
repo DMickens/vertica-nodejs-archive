@@ -40,7 +40,7 @@ if (process.version.startsWith('v8.')) {
     })
 
     it('can destroy stream while reading', function (done) {
-      const stream = new QueryStream('SELECT * FROM generate_series(0, 100), pg_sleep(1)')
+      const stream = new QueryStream('SELECT * FROM generate_series(0, 100), sleep(1)')
       client.query(stream)
       stream.on('data', () => done(new Error('stream should not have returned rows')))
       setTimeout(() => {
@@ -50,7 +50,7 @@ if (process.version.startsWith('v8.')) {
     })
 
     it('emits an error when calling destroy with an error', function (done) {
-      const stream = new QueryStream('SELECT * FROM generate_series(0, 100), pg_sleep(1)')
+      const stream = new QueryStream('SELECT * FROM generate_series(0, 100), sleep(1)')
       client.query(stream)
       stream.on('data', () => done(new Error('stream should not have returned rows')))
       setTimeout(() => {
@@ -65,7 +65,7 @@ if (process.version.startsWith('v8.')) {
     })
 
     it('can destroy stream while reading an error', function (done) {
-      const stream = new QueryStream('SELECT * from  pg_sleep(1), basdfasdf;')
+      const stream = new QueryStream('SELECT * from  sleep(1), basdfasdf;')
       client.query(stream)
       stream.on('data', () => done(new Error('stream should not have returned rows')))
       stream.once('error', () => {
@@ -76,7 +76,7 @@ if (process.version.startsWith('v8.')) {
     })
 
     it('does not crash when destroying the stream immediately after calling read', function (done) {
-      const stream = new QueryStream('SELECT * from generate_series(0, 100), pg_sleep(1);')
+      const stream = new QueryStream('SELECT * from generate_series(0, 100), sleep(1);')
       client.query(stream)
       stream.on('data', () => done(new Error('stream should not have returned rows')))
       stream.destroy()
@@ -84,7 +84,7 @@ if (process.version.startsWith('v8.')) {
     })
 
     it('does not crash when destroying the stream before its submitted', function (done) {
-      const stream = new QueryStream('SELECT * from generate_series(0, 100), pg_sleep(1);')
+      const stream = new QueryStream('SELECT * from generate_series(0, 100), sleep(1);')
       stream.on('data', () => done(new Error('stream should not have returned rows')))
       stream.destroy()
       stream.on('close', done)

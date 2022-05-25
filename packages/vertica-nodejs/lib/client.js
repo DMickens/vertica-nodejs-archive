@@ -49,7 +49,7 @@ class Client extends EventEmitter {
       c.connection ||
       new Connection({
         stream: c.stream,
-        ssl: this.connectionParameters.ssl,
+        tls_mode: this.connectionParameters.tls_mode,
         keepAlive: c.keepAlive || false,
         keepAliveInitialDelayMillis: c.keepAliveInitialDelayMillis || 0,
         encoding: this.connectionParameters.client_encoding || 'utf8',
@@ -59,15 +59,16 @@ class Client extends EventEmitter {
     this.binary = c.binary || defaults.binary
     this.processID = null
     this.secretKey = null
-    this.ssl = this.connectionParameters.ssl || false
+    this.tls_mode = this.connectionParameters.tls_mode || 'disable'
+
     // As with Password, make SSL->Key (the private key) non-enumerable.
     // It won't show up in stack traces
     // or if the client is console.logged
-    if (this.ssl && this.ssl.key) {
+    /*if (this.ssl && this.ssl.key) {
       Object.defineProperty(this.ssl, 'key', {
         enumerable: false,
       })
-    }
+    }*/
 
     this._connectionTimeoutMillis = c.connectionTimeoutMillis || 0
   }
@@ -118,7 +119,8 @@ class Client extends EventEmitter {
 
     // once connection is established send startup message
     con.on('connect', function () {
-      if (self.ssl) {
+      // SSLRequest Message
+      if (self.tls_mode) {
         con.requestSsl()
       } else {
         con.startup(self.getStartupConf())

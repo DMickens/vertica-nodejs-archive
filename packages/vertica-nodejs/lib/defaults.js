@@ -40,7 +40,7 @@ module.exports = {
 
   client_encoding: '',
 
-  ssl: false,
+  tls_mode: 'disable',
 
   application_name: undefined,
 

@@ -19,7 +19,7 @@ class Connection extends EventEmitter {
     this._keepAliveInitialDelayMillis = config.keepAliveInitialDelayMillis
     this.lastBuffer = false
     this.parsedStatements = {}
-    this.ssl = config.ssl || false
+    this.tls_mode = config.tls_mode || 'disable'
     this._ending = false
     this._emitMessage = false
     this.statementCounterBuffer = new SharedArrayBuffer(32)
@@ -61,7 +61,7 @@ class Connection extends EventEmitter {
       self.emit('end')
     })
 
-    if (!this.ssl) {
+    if (this.tls_mode === 'disable') {
       return this.attachListeners(this.stream)
     }
 
@@ -78,12 +78,27 @@ class Connection extends EventEmitter {
           self.stream.end()
           return self.emit('error', new Error('There was an error establishing an SSL connection'))
       }
+      // tls_mode LOGIC
       var tls = require('tls')
       const options = {
         socket: self.stream,
       }
 
-      if (self.ssl !== true) {
+      if (self.tls_mode === 'require') { // basic TLS connection, does not verify CA certificate
+        // what tls properties do we need? keystorepath, keystorepassword,truststorepath,truststorepassword?
+
+        try {
+          // establish connection on current socket instead of maintaining host/port/whatever else
+          self.stream = tls.connect({socket: self.stream, 
+                                     rejectUnauthorized: false}) 
+        }
+        catch (err) {
+          return self.emit('error', err)
+        }
+      }
+      else 
+        return self.emit('error')
+      /*if (self.ssl !== true) {
         Object.assign(options, self.ssl)
 
         if ('key' in self.ssl) {
@@ -98,7 +113,7 @@ class Connection extends EventEmitter {
         self.stream = tls.connect(options)
       } catch (err) {
         return self.emit('error', err)
-      }
+      }*/
       self.attachListeners(self.stream)
       self.stream.on('error', reportStreamError)
 
