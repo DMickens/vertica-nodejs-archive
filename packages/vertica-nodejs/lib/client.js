@@ -60,6 +60,8 @@ class Client extends EventEmitter {
     this.processID = null
     this.secretKey = null
     this.tls_mode = this.connectionParameters.tls_mode || 'disable'
+    this.tls_key_path = this.connectionParameters.tls_key_path
+    this.tls_cert_path = this.connectionParameters.tls_cert_path
 
     // As with Password, make SSL->Key (the private key) non-enumerable.
     // It won't show up in stack traces

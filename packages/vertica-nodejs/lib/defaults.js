@@ -42,6 +42,10 @@ module.exports = {
 
   tls_mode: 'disable',
 
+  tls_key_path: undefined,
+
+  tls_cert_path: undefined,
+
   application_name: undefined,
 
   fallback_application_name: undefined,
@@ -69,6 +73,8 @@ module.exports = {
 
   // A string to identify the vertica-nodejs connection's session on the server
   client_label: '',
+
+
 }
 
 var pgTypes = require('pg-types')

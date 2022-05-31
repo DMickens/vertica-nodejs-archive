@@ -19,12 +19,16 @@ class Connection extends EventEmitter {
     this._keepAliveInitialDelayMillis = config.keepAliveInitialDelayMillis
     this.lastBuffer = false
     this.parsedStatements = {}
-    this.tls_mode = config.tls_mode || 'disable'
     this._ending = false
     this._emitMessage = false
     this.statementCounterBuffer = new SharedArrayBuffer(32)
     this.statementCounter = new Int32Array(this.statementCounterBuffer)
     this.statementCounter[0] = 0
+
+    // encryption
+    this.tls_mode = config.tls_mode || 'disable'
+    this.tls_key_file = config.tls_key_file
+    this.tls_cert_file = config.tls_cert_file
 
     var self = this
     this.on('newListener', function (eventName) {
@@ -68,27 +72,24 @@ class Connection extends EventEmitter {
     this.stream.once('data', function (buffer) {
       var responseCode = buffer.toString('utf8')
       switch (responseCode) {
-        case 'S': // Server supports SSL connections, continue with a secure connection
+        case 'S': // Server supports TLS connections, continue with a secure connection
           break
-        case 'N': // Server does not support SSL connections
+        case 'N': // Server does not support TLS connections
           self.stream.end()
-          return self.emit('error', new Error('The server does not support SSL connections'))
+          return self.emit('error', new Error('The server does not support TLS connections'))
         default:
           // Any other response byte, including 'E' (ErrorResponse) indicating a server error
           self.stream.end()
-          return self.emit('error', new Error('There was an error establishing an SSL connection'))
+          return self.emit('error', new Error('There was an error establishing a TLS connection'))
       }
       // tls_mode LOGIC
       var tls = require('tls')
-      const options = {
-        socket: self.stream,
-      }
 
       if (self.tls_mode === 'require') { // basic TLS connection, does not verify CA certificate
-        // what tls properties do we need? keystorepath, keystorepassword,truststorepath,truststorepassword?
 
         try {
-          // establish connection on current socket instead of maintaining host/port/whatever else
+          // establish connection on current socket
+          // connect even if you can't verify the server's identity
           self.stream = tls.connect({socket: self.stream, 
                                      rejectUnauthorized: false}) 
         }
@@ -96,8 +97,17 @@ class Connection extends EventEmitter {
           return self.emit('error', err)
         }
       }
-      else 
-        return self.emit('error')
+      else if (self.tls_mode === 'verify-ca') {
+        try {
+          // establish connection on current socket
+          // make sure we can verify the server's identity
+          self.stream = tls.connect({socket: self.stream,
+                                     })
+        }
+        catch (err) {
+          return self.emit('error')
+        }
+      }
       /*if (self.ssl !== true) {
         Object.assign(options, self.ssl)
 
