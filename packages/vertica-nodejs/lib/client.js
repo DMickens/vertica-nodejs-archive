@@ -62,16 +62,6 @@ class Client extends EventEmitter {
     this.tls_mode = this.connectionParameters.tls_mode || 'disable'
     this.tls_key_path = this.connectionParameters.tls_key_path
     this.tls_cert_path = this.connectionParameters.tls_cert_path
-
-    // As with Password, make SSL->Key (the private key) non-enumerable.
-    // It won't show up in stack traces
-    // or if the client is console.logged
-    /*if (this.ssl && this.ssl.key) {
-      Object.defineProperty(this.ssl, 'key', {
-        enumerable: false,
-      })
-    }*/
-
     this._connectionTimeoutMillis = c.connectionTimeoutMillis || 0
   }
 
@@ -122,7 +112,7 @@ class Client extends EventEmitter {
     // once connection is established send startup message
     con.on('connect', function () {
       // SSLRequest Message
-      if (self.tls_mode) {
+      if (self.tls_mode !== 'disable') {
         con.requestSsl()
       } else {
         con.startup(self.getStartupConf())

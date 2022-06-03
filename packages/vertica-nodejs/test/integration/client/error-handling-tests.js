@@ -82,7 +82,7 @@ suite.test('query receives error on client shutdown', function (done) {
   client.connect(
     assert.success(function () {
       const config = {
-        text: 'select sleep(5)',
+        text: 'select pg_sleep(5)',
         name: 'foobar',
       }
       let queryError

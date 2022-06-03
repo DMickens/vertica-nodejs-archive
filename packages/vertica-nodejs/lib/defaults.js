@@ -73,8 +73,6 @@ module.exports = {
 
   // A string to identify the vertica-nodejs connection's session on the server
   client_label: '',
-
-
 }
 
 var pgTypes = require('pg-types')

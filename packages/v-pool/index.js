@@ -72,14 +72,7 @@ class Pool extends EventEmitter {
         writable: true,
         value: options.password,
       })
-    }/*
-    if (options != null && options.ssl && options.ssl.key) {
-      // "hiding" the ssl->key so it doesn't show up in stack traces
-      // or if the client is console.logged
-      Object.defineProperty(this.options.ssl, 'key', {
-        enumerable: false,
-      })
-    }*/
+    }
 
     this.options.max = this.options.max || this.options.poolSize || 10
     this.options.maxUses = this.options.maxUses || Infinity

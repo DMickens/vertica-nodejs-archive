@@ -94,13 +94,12 @@ class Connection extends EventEmitter {
 
       if (self.tls_mode === 'require') { // basic TLS connection, does not verify CA certificate
         try {
-
           self.stream = tls.connect({socket: self.stream, 
-                                     rejectUnauthorized: false,
+                                     rejectUnauthorized: false, // clients always request a server certificate
+                                                                // but in 'require' we dont care what it says
                                      pfx: tls_key_file,
                                      checkServerIdentity: (host, cert) => undefined}) 
-        }
-        catch (err) {
+        } catch (err) {
           return self.emit('error', err)
         }
       }
@@ -111,8 +110,7 @@ class Connection extends EventEmitter {
                                      pfx: tls_key_file,
                                      ca: fs.readFileSync(self.tls_cert_file).toString(),
                                      checkServerIdentity: (host, cert) => undefined})
-        }
-        catch (err) {
+        } catch (err) {
           return self.emit('error')
         }
       }
@@ -123,24 +121,11 @@ class Connection extends EventEmitter {
                                      ca: fs.readFileSync(self.tls_cert_file).toString()})
       }
       else {
-        console.log("Made it here");
-        self.emit('error', 'Invalid TLS mode has been entered');
+        self.emit('error', 'Invalid TLS mode has been entered'); // should be unreachable
       }
-      /*if (self.ssl !== true) {
-        Object.assign(options, self.ssl)
-
-        if ('key' in self.ssl) {
-          options.key = self.ssl.key
-        }
-      }
-
+      /*
       if (net.isIP(host) === 0) { // we may need to include this in verify-full
         options.servername = host
-      }
-      try {
-        self.stream = tls.connect(options)
-      } catch (err) {
-        return self.emit('error', err)
       }*/
       self.attachListeners(self.stream)
       self.stream.on('error', reportStreamError)

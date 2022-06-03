@@ -58,10 +58,6 @@ function parse(str) {
     config.tls_mode = 'disable'
   }
 
-  if (config.key_store_path || config.trust_store_path) {
-    config.tls = {} 
-  }
-
   if (config.key_store_path) {
     config.tls.key_store_path = fs.readFileSync(config.key_store_path).toString()
   }
