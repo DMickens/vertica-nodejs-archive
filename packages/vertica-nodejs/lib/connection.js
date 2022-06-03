@@ -85,28 +85,46 @@ class Connection extends EventEmitter {
       // tls_mode LOGIC
       var tls = require('tls')
 
-      if (self.tls_mode === 'require') { // basic TLS connection, does not verify CA certificate
+      // assume mutual mode is on. If it isn't, then it doesn't matter whether or not the client 
+      // key and certificate chain are still undefined. For the client, this means provide the tls_key_file
+      // Also, terminology conflicts between vertica documentation and the node tls package may make this 
+      // seem confusing. checkServerIdentity is the function equivalent to the hostname verifier.
+      // With an undefined checkServerIdentity function, we are still checking to see that the server
+      // certificate is signed by the CA (default or provided).
 
+      if (self.tls_mode === 'require') { // basic TLS connection, does not verify CA certificate
         try {
-          // establish connection on current socket
-          // connect even if you can't verify the server's identity
+
           self.stream = tls.connect({socket: self.stream, 
-                                     rejectUnauthorized: false}) 
+                                     rejectUnauthorized: false,
+                                     pfx: tls_key_file,
+                                     checkServerIdentity: (host, cert) => undefined}) 
         }
         catch (err) {
           return self.emit('error', err)
         }
       }
-      else if (self.tls_mode === 'verify-ca') {
+      else if (self.tls_mode === 'verify-ca') { //verify that the server certificate is signed by a trusted CA
         try {
-          // establish connection on current socket
-          // make sure we can verify the server's identity
           self.stream = tls.connect({socket: self.stream,
-                                     })
+                                     rejectUnauthorized: true, 
+                                     pfx: tls_key_file,
+                                     ca: fs.readFileSync(self.tls_cert_file).toString(),
+                                     checkServerIdentity: (host, cert) => undefined})
         }
         catch (err) {
           return self.emit('error')
         }
+      }
+      else if (self.tls_mode === 'verify-full') { //verify that the name on the CA-signed server certificate matches it's hostname
+          self.stream = tls.connect({socket: self.stream,
+                                     rejectUnauthorized: true, 
+                                     pfx: tls_key_file,
+                                     ca: fs.readFileSync(self.tls_cert_file).toString()})
+      }
+      else {
+        console.log("Made it here");
+        self.emit('error', 'Invalid TLS mode has been entered');
       }
       /*if (self.ssl !== true) {
         Object.assign(options, self.ssl)
@@ -116,7 +134,7 @@ class Connection extends EventEmitter {
         }
       }
 
-      if (net.isIP(host) === 0) {
+      if (net.isIP(host) === 0) { // we may need to include this in verify-full
         options.servername = host
       }
       try {
