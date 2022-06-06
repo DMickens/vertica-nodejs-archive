@@ -9,8 +9,11 @@ const { tls_cert_file } = require('../../../lib/defaults')
 /*
 * Summary of istructions for configuring your test server to support connections under desired TLS mode.
 *  This method is what is being used for testing and uses a self signed CA certificate.
-*  Steps 1, 2, 4, 5, 6, 7, 8 have been done for you, only do them again if you want to have your own keys/certificates
-*  Otherwise you can look in /test/tls for the keys/certificates needed for these steps, and import into your server
+*  Steps 1, 2, 6, 7, 8 have been done for you, only do them again if you want to have your own client/ca keys/certificates
+*  Otherwise you can look in /test/tls for the keys/certificates needed for these steps
+*  You will still need to create your own key and certificate for your server, it makes sense for everyone to have 
+*  their own. Steps for doing so can be found here:
+*    https://www.vertica.com/docs/11.0.x/HTML/Content/Authoring/Security/TLS/GeneratingCertificatesAndKeys.htm?zoom_highlight=view%20private%20key
 *  
 *  1. create private key for CA 
 *  2. create root CA certificate from private key
