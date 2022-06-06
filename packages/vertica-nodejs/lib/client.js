@@ -50,6 +50,8 @@ class Client extends EventEmitter {
       new Connection({
         stream: c.stream,
         tls_mode: this.connectionParameters.tls_mode,
+        tls_cert_file: this.connectionParameters.tls_cert_file,
+        tls_key_file: this.connectionParameters.tls_key_file,
         keepAlive: c.keepAlive || false,
         keepAliveInitialDelayMillis: c.keepAliveInitialDelayMillis || 0,
         encoding: this.connectionParameters.client_encoding || 'utf8',
@@ -60,8 +62,8 @@ class Client extends EventEmitter {
     this.processID = null
     this.secretKey = null
     this.tls_mode = this.connectionParameters.tls_mode || 'disable'
-    this.tls_key_path = this.connectionParameters.tls_key_path
-    this.tls_cert_path = this.connectionParameters.tls_cert_path
+    this.tls_key_file = this.connectionParameters.tls_key_file
+    this.tls_cert_file = this.connectionParameters.tls_cert_file
     this._connectionTimeoutMillis = c.connectionTimeoutMillis || 0
   }
 

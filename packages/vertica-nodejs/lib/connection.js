@@ -1,6 +1,7 @@
 'use strict'
 
 var net = require('net')
+var fs = require('fs')
 var EventEmitter = require('events').EventEmitter
 
 const { parse, serialize } = require('v-protocol')
@@ -84,34 +85,42 @@ class Connection extends EventEmitter {
       }
       // tls_mode LOGIC
       var tls = require('tls')
-
-      // assume mutual mode is on. If it isn't, then it doesn't matter whether or not the client 
-      // key and certificate chain are still undefined. For the client, this means provide the tls_key_file
+      var tls_options = {socket: self.stream}
+      // Instead of keeping track of whether mutual mode is on or not, just check to see if the properties 
+      // needed for mutual mode are defined. If they are and mutual mode is off, sending it won't cause a 
+      // problem because the server won't be asking for them.
       // Also, terminology conflicts between vertica documentation and the node tls package may make this 
       // seem confusing. checkServerIdentity is the function equivalent to the hostname verifier.
       // With an undefined checkServerIdentity function, we are still checking to see that the server
       // certificate is signed by the CA (default or provided).
 
       if (self.tls_mode === 'require') { // basic TLS connection, does not verify CA certificate
+        tls_options.rejectUnauthorized = false
+        tls_options.checkServerIdentity = (host , cert) => undefined
+        if (self.tls_key_file) {// the client won't know whether or not this is required, depends on server mode
+          tls_options.pfx = self.tls_key_file
+        }
         try {
-          self.stream = tls.connect({socket: self.stream, 
-                                     rejectUnauthorized: false, // clients always request a server certificate
-                                                                // but in 'require' we dont care what it says
-                                     pfx: tls_key_file,
-                                     checkServerIdentity: (host, cert) => undefined}) 
+          self.stream = tls.connect(tls_options);
         } catch (err) {
           return self.emit('error', err)
         }
       }
       else if (self.tls_mode === 'verify-ca') { //verify that the server certificate is signed by a trusted CA
         try {
-          self.stream = tls.connect({socket: self.stream,
-                                     rejectUnauthorized: true, 
-                                     pfx: tls_key_file,
-                                     ca: fs.readFileSync(self.tls_cert_file).toString(),
-                                     checkServerIdentity: (host, cert) => undefined})
+          tls_options.rejectUnauthorized = true
+          tls_options.checkServerIdentity = (host, cer) => undefined
+          if (self.tls_cert_file) {
+            tls_options.ca = fs.readFileSync(self.tls_cert_file).toString()
+          } else {
+            throw new Error('verify-ca mode requires setting tls_cert_file property')
+          }
+          if (self.tls_key_file) {// the client won't know whether or not this is required, depends on server mode
+            tls_options.pfx = self.tls_key_file
+          }
+          self.stream = tls.connect(tls_options)
         } catch (err) {
-          return self.emit('error')
+          return self.emit('error', err)
         }
       }
       else if (self.tls_mode === 'verify-full') { //verify that the name on the CA-signed server certificate matches it's hostname
