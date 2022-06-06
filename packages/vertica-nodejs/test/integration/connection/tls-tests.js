@@ -74,7 +74,7 @@ suite.test('vertica tls - require mode - no client certificate', function () {
         console.log(error)
         assert(false)
       }
-      // server should be in one of these modes for us to have gotten this far
+      // server should be in one of these modes for us to have gotten this far without sending client certificate
       assert(['ENABLE', 'TRY_VERIFY'].includes(res.rows[0].mode))
       client.end()
     })
@@ -121,8 +121,53 @@ suite.test('vertica tls - verify-ca - valid server certificate', function () {
         console.log(error)
         assert(false)
       }
-      console.log(res.rows[0].mode)
-      // server should be in one of these modes for us to have gotten this far
+      // server should be in one of these modes for us to have gotten this far without sending client certificate
+      assert(['ENABLE', 'TRY_VERIFY'].includes(res.rows[0].mode))
+      client.end()
+    })
+  })
+})
+
+// Test case for tls_mode = 'verify-full'
+// This should fail regardles of server configuration, but depending on the configuration it may fail
+// for a few different expected reasons. Make sure it fails like we want it to
+suite.test('vertica tls - verify-full - no tls_cert_file specified', function () {
+  var client = new vertica.Client({tls_mode: 'verify-full'}) // default trusted CAs aren't acceptable, so nothing to specify
+  assert.equal(client.tls_mode, 'verify-full')
+  client.connect(err => {
+    if (err) {
+      //console.log(err)
+      assert(err.message.includes("verify-ca mode requires setting tls_cert_file property") // we didn't set the property, this is ok
+          || err.message.includes("SSL alert number 40") // VERIFY_CA mode, this is ok
+          || err.message.includes("The server does not support TLS connections")) // DISABLE mode, this is ok
+    }
+    client.end()
+  })
+})
+
+// Test case for tls_mode = 'verify-full'
+// The difference between verify-ca and verify-full is that we want to verify that the server host name matches
+// the name on the certificate that the server gave us during the TLS handshake. For this test, nothing different
+// needs to be done or asserted except for using the verify-full tls mode. The behavior should be the same for 
+// each server mode, the only difference is logic in the client handling checking the certificate
+suite.test('vertica tls - verify-full - valid server certificate', function () {
+  var client = new vertica.Client({tls_mode: 'verify-full',
+                                   tls_cert_file: '../../tls/ca_cert.pem'}) 
+  assert.equal(client.tls_mode, 'verify-full')
+  client.connect(err => {
+    if (err) {
+      //console.log(err)
+      assert(err.message.includes("SSL alert number 40") // VERIFY_CA mode, this is ok
+          || err.message.includes("The server does not support TLS connections")) // DISABLE mode, this is ok
+      return
+    }
+    assert.equal(client.connection.stream.constructor.name.toString(), "TLSSocket")
+    client.query("SELECT mode FROM tls_configurations where name = 'server' LIMIT 1", (err, res) => {
+      if (err) {
+        console.log(error)
+        assert(false)
+      }
+      // server should be in one of these modes for us to have gotten this far without sending client certificate
       assert(['ENABLE', 'TRY_VERIFY'].includes(res.rows[0].mode))
       client.end()
     })

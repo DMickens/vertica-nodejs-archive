@@ -124,10 +124,20 @@ class Connection extends EventEmitter {
         }
       }
       else if (self.tls_mode === 'verify-full') { //verify that the name on the CA-signed server certificate matches it's hostname
-          self.stream = tls.connect({socket: self.stream,
-                                     rejectUnauthorized: true, 
-                                     pfx: tls_key_file,
-                                     ca: fs.readFileSync(self.tls_cert_file).toString()})
+        try {
+          tls_options.rejectUnauthorized = false
+          if (self.tls_cert_file) {
+            tls_options.ca = fs.readFileSync(self.tls_cert_file).toString()
+          } else {
+            throw new Error('verify-ca mode requires setting tls_cert_file property')
+          }
+          if (self.tls_key_file) {
+            tls_options.pfx = self.tls_key_file
+          }
+          self.stream = tls.connect(tls_options)
+        } catch (err){
+          return self.emit('error', err)
+        }
       }
       else {
         self.emit('error', 'Invalid TLS mode has been entered'); // should be unreachable
