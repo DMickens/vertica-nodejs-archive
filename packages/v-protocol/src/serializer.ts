@@ -22,16 +22,16 @@ const PROTOCOL_MINOR_FIXED = 11 // since this client requires 3.11+, these are r
 
 const startup = (opts: Record<string, string>): Buffer => {
   // protocol version
-  writer.addInt16(PROTOCOL_MAJOR_FIXED).addInt16(PROTOCOL_MINOR_FIXED) // equivalent to adding Int32 (MAJOR << 16 | MINOR)
+  //writer.addInt16(PROTOCOL_MAJOR_FIXED).addInt16(PROTOCOL_MINOR_FIXED) // equivalent to adding Int32 (MAJOR << 16 | MINOR)
+  writer.addInt16(3).addInt16(0) 
   for (const key of Object.keys(opts)) {
     if (key === 'protocol_version') { // the protocol_version is added as a 32 bit integer
       continue
     }
-    if (key === 'client_label') { console.log ("Client label being sent")}
     writer.addCString(key).addCString(opts[key])
   }
-  writer.addCString('protocol_version').addInt32(parseInt(opts['protocol_version']))
-
+  //writer.addCString('protocol_version').addInt32(parseInt(opts['protocol_version']))
+  writer.addCString('protocol_version').addInt32((3 << 16 | 0))
   writer.addCString('client_encoding').addCString('UTF8')
 
   var bodyBuffer = writer.addCString('').flush()

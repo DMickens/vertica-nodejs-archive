@@ -7,17 +7,16 @@ var suite = new helper.Suite()
 suite.test('vertica label connection parameter', function () {
   // assert current default behavior
   assert.equal(vertica.defaults.client_label, '')
-  /*
+  
   // assert creating a client connection will use default label and persist
   var client_default = new vertica.Client()
   assert.equal(client_default.client_label, vertica.defaults.client_label)
   client_default.connect()
-  client_default.query('SELECT GET_CLIENT_LABEL() as label', (err, res) => {
+  client_default.query('SELECT GET_CLIENT_LABEL()', (err, res) => {
       if (err) assert(false)
-      console.log(res.rows)
-      assert.equal(res.rows[0]['label'], '') // vertica considers the empty string as null for client label
+      assert.equal(res.rows[0]['GET_CLIENT_LABEL'], vertica.defaults.client_label)
       client_default.end()
-  })*/
+  })
 
   // assert creating a client connection with specified label will persist
   var client_test = new vertica.Client({client_label: 'distinctLabel'})
@@ -25,8 +24,7 @@ suite.test('vertica label connection parameter', function () {
   client_test.connect()
   client_test.query('SELECT GET_CLIENT_LABEL()', (err, res) => {
     if (err) assert(false)
-    console.log(res.rows)
-    assert.equal(res.rows[0]['label'], 'distinctLabel')
+    assert.equal(res.rows[0]['GET_CLIENT_LABEL'], 'distinctLabel')
     client_test.end()
   })
 })
