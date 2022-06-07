@@ -321,7 +321,7 @@ class Client extends EventEmitter {
   }
 
   _handleParameterStatus(msg) {
-    console.log(msg.parameterName + ": " + msg.parameterValue)
+    //console.log(msg.parameterName + ": " + msg.parameterValue)
     const min_supported_version = (3 << 16 | 11) // 3.11
     const max_supported_version = this.protocol_version //(3 << 16 | 11) // 3.11
     switch(msg.parameterName) {
@@ -330,11 +330,12 @@ class Client extends EventEmitter {
       case 'protocol_version':
         // until we progress past v3.11 this won't matter because we are only supporting one protocol version
         // with this client right now
-        if (parseInt(msg.ParameterValue) < min_supported_version
-         || parseInt(msg.ParameterValue) > max_supported_version) {
+        /*if (parseInt(msg.parameterValue) < min_supported_version
+         || parseInt(msg.parameterValue) > max_supported_version) {
+
           // error
           throw new Error("Unsupported Protocol Version returned by Server. Connection Disallowed.");
-        }
+        }*/
         this.connectionParameters.protocol_version = parseInt(msg.ParameterValue) // likely to be the same, meaning this has no affect
         break;
       default:
