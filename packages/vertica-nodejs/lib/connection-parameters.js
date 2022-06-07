@@ -90,6 +90,7 @@ class ConnectionParameters {
 
     this.backup_server_node = parseBackupServerNodes(val('backup_server_node', config))
     this.client_label = val('client_label', config, false)
+    this.protocol_version = (3 << 16 | 11) // 3.11 -> (major << 16 | minor) -> (3 << 16 | 11) -> 196619
 
     if (config.connectionTimeoutMillis === undefined) {
       this.connect_timeout = process.env.PGCONNECT_TIMEOUT || 0
