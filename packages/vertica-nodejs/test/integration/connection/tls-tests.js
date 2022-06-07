@@ -48,8 +48,8 @@ suite.test('vertica tls - disable mode - all', function () {
         console.log(err)
         assert(false)
       }
-      //console.log(res.rows[0].mode)
-      assert(['ENABLE', 'DISABLE', 'TRY_VERIFY', 'VERIFY_CA'].includes(res.rows[0].mode)) // this assert shouldn't be able to fail
+      console.log(res.rows[0].mode)
+      assert(['ENABLE', 'DISABLE', 'TRY_VERIFY', 'VERIFY_CA', 'VERIFY_FULL'].includes(res.rows[0].mode)) // this assert shouldn't be able to fail
       client.end()
     })
   })
@@ -159,7 +159,7 @@ suite.test('vertica tls - verify-full - valid server certificate', function () {
   assert.equal(client.tls_mode, 'verify-full')
   client.connect(err => {
     if (err) {
-      //console.log(err)
+      console.log(err)
       assert(err.message.includes("SSL alert number 40") // VERIFY_CA mode, this is ok
           || err.message.includes("The server does not support TLS connections")) // DISABLE mode, this is ok
       return
