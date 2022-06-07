@@ -125,7 +125,7 @@ class Connection extends EventEmitter {
       }
       else if (self.tls_mode === 'verify-full') { //verify that the name on the CA-signed server certificate matches it's hostname
         try {
-          tls_options.rejectUnauthorized = false
+          tls_options.rejectUnauthorized = true
           if (self.tls_cert_file) {
             tls_options.ca = fs.readFileSync(self.tls_cert_file).toString()
           } else {
@@ -142,10 +142,6 @@ class Connection extends EventEmitter {
       else {
         self.emit('error', 'Invalid TLS mode has been entered'); // should be unreachable
       }
-      /*
-      if (net.isIP(host) === 0) { // we may need to include this in verify-full
-        options.servername = host
-      }*/
       self.attachListeners(self.stream)
       self.stream.on('error', reportStreamError)
 

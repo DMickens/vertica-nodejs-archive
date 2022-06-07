@@ -13,7 +13,7 @@ const { tls_cert_file } = require('../../../lib/defaults')
 *  Otherwise you can look in /test/tls for the keys/certificates needed for these steps
 *  You will still need to create your own key and certificate for your server, it makes sense for everyone to have 
 *  their own. Steps for doing so can be found here:
-*    https://www.vertica.com/docs/11.0.x/HTML/Content/Authoring/Security/TLS/GeneratingCertificatesAndKeys.htm?zoom_highlight=view%20private%20key
+*    https://www.vertica.com/docs/latest/HTML/Content/Authoring/Security/TLS/GeneratingCertificatesAndKeys.htm
 *  
 *  1. create private key for CA 
 *  2. create root CA certificate from private key
