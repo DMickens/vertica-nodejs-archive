@@ -18,20 +18,18 @@ const enum code {
 
 const writer = new Writer()
 const PROTOCOL_MAJOR_FIXED = 3  // these have no bearing in new servers with protocol version >= 3.7
-const PROTOCOL_MINOR_FIXED = 11 // since this client requires 3.11+, these are required but unused
+const PROTOCOL_MINOR_FIXED = 0 // since this client requires 3.11+, these are required but unused
 
 const startup = (opts: Record<string, string>): Buffer => {
   // protocol version
-  //writer.addInt16(PROTOCOL_MAJOR_FIXED).addInt16(PROTOCOL_MINOR_FIXED) // equivalent to adding Int32 (MAJOR << 16 | MINOR)
-  writer.addInt16(3).addInt16(0) 
+  writer.addInt16(PROTOCOL_MAJOR_FIXED).addInt16(PROTOCOL_MINOR_FIXED) // equivalent to adding Int32 (MAJOR << 16 | MINOR)
   for (const key of Object.keys(opts)) {
     if (key === 'protocol_version') { // the protocol_version is added as a 32 bit integer
       continue
     }
     writer.addCString(key).addCString(opts[key])
   }
-  //writer.addCString('protocol_version').addInt32(parseInt(opts['protocol_version']))
-  writer.addCString('protocol_version').addInt32((3 << 16 | 0))
+  writer.addCString('protocol_version').addInt32(parseInt(opts['protocol_version']))
   writer.addCString('client_encoding').addCString('UTF8')
 
   var bodyBuffer = writer.addCString('').flush()
