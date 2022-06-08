@@ -321,14 +321,13 @@ class Client extends EventEmitter {
   }
 
   _handleParameterStatus(msg) {
-    console.log(msg.parameterName + ": " + msg.parameterValue)
     const min_supported_version = (3 << 16 | 0)         // 3.0 - newest protocol breaks functionality
     const max_supported_version = this.protocol_version // for now we are enforcing 3.0
     switch(msg.parameterName) {
       // right now we only care about the protocol_version
       // if we want to have the parameterStatus message update any other connection properties, add them here
       case 'protocol_version':
-        // until we progress past v3.11 this won't matter because we are only supporting one protocol version
+        // until we allow past 3.0 this won't matter because we are only supporting one protocol version
         // with this client right now
         if (parseInt(msg.parameterValue) < min_supported_version
          || parseInt(msg.parameterValue) > max_supported_version) {

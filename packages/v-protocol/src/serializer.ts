@@ -18,7 +18,7 @@ const enum code {
 
 const writer = new Writer()
 const PROTOCOL_MAJOR_FIXED = 3  // these have no bearing in new servers with protocol version >= 3.7
-const PROTOCOL_MINOR_FIXED = 0 // since this client requires 3.11+, these are required but unused
+const PROTOCOL_MINOR_FIXED = 0  // these are required but unused
 
 const startup = (opts: Record<string, string>): Buffer => {
   // protocol version
