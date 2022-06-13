@@ -16,6 +16,7 @@ import {
   NotificationResponseMessage,
   RowDescriptionMessage,
   ParameterDescriptionMessage,
+  CommandDescriptionMessage,
   Field,
   DataRowMessage,
   ParameterStatusMessage,
@@ -64,6 +65,7 @@ const enum MessageCodes {
   NoticeMessage = 0x4e, // N
   RowDescriptionMessage = 0x54, // T
   ParameterDescriptionMessage = 0x74, // t
+  commandDescriptionMessage = 0x6d, // m
   PortalSuspended = 0x73, // s
   ReplicationStart = 0x57, // W
   EmptyQuery = 0x49, // I
@@ -99,6 +101,7 @@ export class Parser {
       // length is 1 Uint32BE - it is the length of the message EXCLUDING the code
       const length = this.buffer.readUInt32BE(offset + CODE_LENGTH)
       const fullMessageLength = CODE_LENGTH + length
+      console.log(code.toString(16) + " : " + fullMessageLength)
       if (fullMessageLength + offset <= bufferFullLength) {
         const message = this.handlePacket(offset + HEADER_LENGTH, code, length, this.buffer)
         callback(message)
@@ -192,6 +195,8 @@ export class Parser {
         return this.parseRowDescriptionMessage(offset, length, bytes)
       case MessageCodes.ParameterDescriptionMessage:
         return this.parseParameterDescriptionMessage(offset, length, bytes)
+      case MessageCodes.commandDescriptionMessage:
+        return this.parseCommandDescriptionMessage(offset, length, bytes)
       case MessageCodes.CopyIn:
         return this.parseCopyInMessage(offset, length, bytes)
       case MessageCodes.CopyOut:
@@ -250,6 +255,8 @@ export class Parser {
   private parseRowDescriptionMessage(offset: number, length: number, bytes: Buffer) {
     this.reader.setBuffer(offset, bytes)
     const fieldCount = this.reader.int16()
+    const nonNativeTypeCount = this.reader.int32()
+    // if nonNativeTypeCount > 0, error out for now
     const message = new RowDescriptionMessage(length, fieldCount)
     for (let i = 0; i < fieldCount; i++) {
       message.fields[i] = this.parseField()
@@ -259,10 +266,16 @@ export class Parser {
 
   private parseField(): Field {
     const name = this.reader.cstring()
-    const tableID = this.reader.int32()
+    const tableID = this.reader.uint64()
+    const schemaName = this.reader.cstring()
+    const tableName = this.reader.cstring()
     const columnID = this.reader.int16()
+    const parentTypeID = this.reader.int16()
+    const usesTypePool = this.reader.bytes(1)
     const dataTypeID = this.reader.int32()
     const dataTypeSize = this.reader.int16()
+    const allowsNull = this.reader.int16()
+    const isIdentity = this.reader.int16()
     const dataTypeModifier = this.reader.int32()
     const mode = this.reader.int16() === 0 ? 'text' : 'binary'
     return new Field(name, tableID, columnID, dataTypeID, dataTypeSize, dataTypeModifier, mode)
@@ -276,6 +289,19 @@ export class Parser {
       message.dataTypeIDs[i] = this.reader.int32()
     }
     return message
+  }
+
+  private parseCommandDescriptionMessage(offset: number, length: number, bytes: Buffer) {
+    this.reader.setBuffer(offset, bytes)
+    const tag = this.reader.cstring()
+    const convertedToCopy = this.reader.int16()
+    //const convertedStatement = convertedToCopy === 1 ? this.reader.cstring() : ''
+    const convertedStatement = this.reader.cstring()
+    console.log("Tag: " + tag + " : " + Buffer.byteLength(tag))
+    console.log("ConvertedToCopy: " + convertedToCopy + " : " + 2)
+    console.log("convertedStatement: " + convertedStatement + " : " + Buffer.byteLength(convertedStatement))
+    console.log("Length: " + length)
+    return new CommandDescriptionMessage(length, tag, convertedToCopy, convertedStatement)
   }
 
   private parseDataRowMessage(offset: number, length: number, bytes: Buffer) {
