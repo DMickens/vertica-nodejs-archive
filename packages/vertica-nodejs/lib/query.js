@@ -16,7 +16,7 @@ class Query extends EventEmitter {
     this.rows = config.rows
     this.types = config.types
     this.name = config.name
-    this.binary = config.binary
+    this.binary = config.binary || false
     // use unique portal name each time
     this.portal = config.portal || ''
     this.callback = config.callback
@@ -74,6 +74,12 @@ class Query extends EventEmitter {
     this._checkForMultirow()
     this._result.addFields(msg.fields)
     this._accumulateRows = this.callback || !this.listeners('row').length
+  }
+
+  handleBindComplete(connection) {
+    connection.execute({portal: this.portal,
+                        rows: this.rows})
+    //connection.sync()
   }
 
   handleDataRow(msg) {
@@ -164,7 +170,8 @@ class Query extends EventEmitter {
   }
 
   handlePortalSuspended(connection) {
-    this._getRows(connection, this.rows)
+    //this._getRows(connection, this.rows)
+    //connection.sync()
   }
 
   _getRows(connection, rows) {
@@ -214,6 +221,12 @@ class Query extends EventEmitter {
     // because we're mapping user supplied values to
     // postgres wire protocol compatible values it could
     // throw an exception, so try/catch this section
+
+    // parse out the oid from the ParameterDescription message parameters, since that's what we need to bind with
+    var oids = []
+    for (var i = 0; i < msg.parameters.length; i++) {
+      oids.push(msg.parameters[i].oid)
+    }
     try {
       connection.bind({
         portal: this.portal,
@@ -221,14 +234,13 @@ class Query extends EventEmitter {
         values: this.values,
         binary: this.binary,
         valueMapper: utils.prepareValue,
-        dataTypeIDs: msg.dataTypeIDs,
+        dataTypeIDs: oids,
       })
     } catch (err) {
       this.handleError(err, connection)
       return
     }
-
-    this._getRows(connection, this.rows)
+    connection.flush() // flush to force the bind complete in order to continue the sequence
   }
 
   handleCopyInResponse(connection) {

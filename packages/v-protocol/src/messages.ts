@@ -148,18 +148,28 @@ export class Field {
 
 export class RowDescriptionMessage {
   public readonly name: MessageName = 'rowDescription'
-  //public readonly nonNativeTypes: number; 
+  //public readonly nonNativeTypes: number; // leaving as breadcrumb for where to begin implementation of non native types
   public readonly fields: Field[]
   constructor(public readonly length: number, public readonly fieldCount: number) {
     this.fields = new Array(this.fieldCount)
   }
 }
 
+export class Parameter {
+  constructor (
+    public readonly isNonNative: boolean,
+    public readonly oid: number, // for non native types, the oid becomes the index into the type mapping pool
+    public readonly typemod: number,
+    public readonly hasNotNullConstraint: number
+  ) {}
+}
+
 export class ParameterDescriptionMessage {
   public readonly name: MessageName = 'parameterDescription'
-  public readonly dataTypeIDs: number[]
+  //public readonly nonNativeTyeps: number // leaving as breadcrumb for where to begin implementation of non native types
+  public readonly parameters: Parameter[]
   constructor(public readonly length: number, public readonly parameterCount: number) {
-    this.dataTypeIDs = new Array(this.parameterCount)
+    this.parameters = new Array(this.parameterCount)
   }
 }
 

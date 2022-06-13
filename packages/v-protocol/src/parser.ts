@@ -16,6 +16,7 @@ import {
   NotificationResponseMessage,
   RowDescriptionMessage,
   ParameterDescriptionMessage,
+  Parameter,
   CommandDescriptionMessage,
   Field,
   DataRowMessage,
@@ -98,10 +99,10 @@ export class Parser {
     while (offset + HEADER_LENGTH <= bufferFullLength) {
       // code is 1 byte long - it identifies the message type
       const code = this.buffer[offset]
+      console.log(code.toString(16))
       // length is 1 Uint32BE - it is the length of the message EXCLUDING the code
       const length = this.buffer.readUInt32BE(offset + CODE_LENGTH)
       const fullMessageLength = CODE_LENGTH + length
-      console.log(code.toString(16) + " : " + fullMessageLength)
       if (fullMessageLength + offset <= bufferFullLength) {
         const message = this.handlePacket(offset + HEADER_LENGTH, code, length, this.buffer)
         callback(message)
@@ -157,8 +158,9 @@ export class Parser {
 
   private handlePacket(offset: number, code: number, length: number, bytes: Buffer): BackendMessage {
     switch (code) {
-      case MessageCodes.BindComplete:
+      case MessageCodes.BindComplete: {
         return bindComplete
+      }
       case MessageCodes.ParseComplete:
         return parseComplete
       case MessageCodes.CloseComplete:
@@ -284,11 +286,24 @@ export class Parser {
   private parseParameterDescriptionMessage(offset: number, length: number, bytes: Buffer) {
     this.reader.setBuffer(offset, bytes)
     const parameterCount = this.reader.int16()
+    const nonNativeTypeCount = this.reader.int32() 
+    // if nonNativeTypeCount > 0, error out for now
     const message = new ParameterDescriptionMessage(length, parameterCount)
     for (let i = 0; i < parameterCount; i++) {
-      message.dataTypeIDs[i] = this.reader.int32()
+      message.parameters[i] = this.parseParameter()
     }
     return message
+  }
+
+  private parseParameter(): Parameter {
+    const isNonNative = this.reader.byte() !== 0
+    if (isNonNative) {
+      //error
+    }
+    const oid = this.reader.int32()
+    const typemod = this.reader.int32()
+    const hasNotNull = this.reader.int16()
+    return new Parameter(isNonNative, oid, typemod, hasNotNull);
   }
 
   private parseCommandDescriptionMessage(offset: number, length: number, bytes: Buffer) {
@@ -297,10 +312,7 @@ export class Parser {
     const convertedToCopy = this.reader.int16()
     //const convertedStatement = convertedToCopy === 1 ? this.reader.cstring() : ''
     const convertedStatement = this.reader.cstring()
-    console.log("Tag: " + tag + " : " + Buffer.byteLength(tag))
-    console.log("ConvertedToCopy: " + convertedToCopy + " : " + 2)
-    console.log("convertedStatement: " + convertedStatement + " : " + Buffer.byteLength(convertedStatement))
-    console.log("Length: " + length)
+
     return new CommandDescriptionMessage(length, tag, convertedToCopy, convertedStatement)
   }
 
