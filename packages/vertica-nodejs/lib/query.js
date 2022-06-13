@@ -79,7 +79,7 @@ class Query extends EventEmitter {
   handleBindComplete(connection) {
     connection.execute({portal: this.portal,
                         rows: this.rows})
-    //connection.sync()
+    connection.sync()
   }
 
   handleDataRow(msg) {
@@ -170,11 +170,10 @@ class Query extends EventEmitter {
   }
 
   handlePortalSuspended(connection) {
-    //this._getRows(connection, this.rows)
     //connection.sync()
   }
 
-  _getRows(connection, rows) {
+  /*_getRows(connection, rows) {
     connection.execute({
       portal: this.portal,
       rows: rows,
@@ -187,7 +186,7 @@ class Query extends EventEmitter {
       // otherwise flush the call out to read more rows
       connection.flush()
     }
-  }
+  }*/
 
   // http://developer.postgresql.org/pgdocs/postgres/protocol-flow.html#PROTOCOL-FLOW-EXT-QUERY
   prepare(connection) {
