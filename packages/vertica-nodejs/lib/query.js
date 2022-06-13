@@ -170,23 +170,8 @@ class Query extends EventEmitter {
   }
 
   handlePortalSuspended(connection) {
-    //connection.sync()
+    //do nothing, vertica doesn't support result-row count limit
   }
-
-  /*_getRows(connection, rows) {
-    connection.execute({
-      portal: this.portal,
-      rows: rows,
-    })
-    // if we're not reading pages of rows send the sync command
-    // to indicate the pipeline is finished
-    if (!rows) {
-      connection.sync()
-    } else {
-      // otherwise flush the call out to read more rows
-      connection.flush()
-    }
-  }*/
 
   // http://developer.postgresql.org/pgdocs/postgres/protocol-flow.html#PROTOCOL-FLOW-EXT-QUERY
   prepare(connection) {

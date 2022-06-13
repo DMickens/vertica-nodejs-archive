@@ -92,35 +92,6 @@ export class Parser {
     this.mode = opts?.mode || 'text'
   }
 
-  public codeName(code: number): string {
-    switch(code) {
-      case 0x44: return "DataRow"
-      case 0x31: return "ParseComplete"
-      case 0x32: return "BindComplete"
-      case 0x33: return "CloseComplete"
-      case 0x43: return "CopyDoneResponse"
-      case 0x5a: return "ReadyForQuery"
-      case 0x6e: return "NoData"
-      case 0x41: return "?"
-      case 0x52: return "AuthenticationResponse"
-      case 0x53: return "ParameterStatus"
-      case 0x4b: return "BackendKeyData"
-      case 0x45: return "ErrorMessage"
-      case 0x4e: return "NoticeMessage"
-      case 0x54: return "RowDescriptionMessage"
-      case 0x74: return "ParameterDescription"
-      case 0x6d: return "CommandDescription"
-      case 0x73: return "PortalSuspended"
-      case 0x57: return "ReplicationStart"
-      case 0x49: return "EmptyQuery"
-      case 0x47: return "CopyIn"
-      case 0x48: return "CopyOut"
-      case 0x63: return "CopyDone"
-      case 0x64: return "CopyData"
-      default: return "??"
-    }
-  }
-
   public parse(buffer: Buffer, callback: MessageCallback) {
     this.mergeBuffer(buffer)
     const bufferFullLength = this.bufferOffset + this.bufferLength
@@ -128,7 +99,6 @@ export class Parser {
     while (offset + HEADER_LENGTH <= bufferFullLength) {
       // code is 1 byte long - it identifies the message type
       const code = this.buffer[offset]
-      console.log(this.codeName(code))
       // length is 1 Uint32BE - it is the length of the message EXCLUDING the code
       const length = this.buffer.readUInt32BE(offset + CODE_LENGTH)
       const fullMessageLength = CODE_LENGTH + length
@@ -187,9 +157,8 @@ export class Parser {
 
   private handlePacket(offset: number, code: number, length: number, bytes: Buffer): BackendMessage {
     switch (code) {
-      case MessageCodes.BindComplete: {
+      case MessageCodes.BindComplete:
         return bindComplete
-      }
       case MessageCodes.ParseComplete:
         return parseComplete
       case MessageCodes.CloseComplete:
@@ -339,7 +308,6 @@ export class Parser {
     this.reader.setBuffer(offset, bytes)
     const tag = this.reader.cstring()
     const convertedToCopy = this.reader.int16()
-    //const convertedStatement = convertedToCopy === 1 ? this.reader.cstring() : ''
     const convertedStatement = this.reader.cstring()
 
     return new CommandDescriptionMessage(length, tag, convertedToCopy, convertedStatement)

@@ -167,18 +167,14 @@ const bind = (config: BindOpts = {}): Buffer => {
   }
 
   // parameter values
-  //writeValues(values, config.valueMapper)
   for (let i = 0; i < parameterCount; i++) {
     writer.addInt32(values[i].length + 1)
     writer.addCString(values[i])
   }
 
-  //writer.add(paramWriter.flush())
-
   // result format codes
-  // assume same format for all result fields for now
+  // binary transfer not supported, will all be text all the time
   writer.addInt16(0)
-  //writer.addInt16(binary ? ParamType.BINARY : ParamType.STRING)
 
   return writer.flush(code.bind)
 }
