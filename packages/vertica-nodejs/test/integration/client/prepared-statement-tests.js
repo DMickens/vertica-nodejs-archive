@@ -95,7 +95,7 @@ var suite = new helper.Suite()
     const query1 = {
       name: 'testName',
       text: 'Insert into insertTest values (?, ?, ?, ?, ?)',
-      values: ['true', '5', 'z', "foo", '12345.67890'],
+      values: [true, 5, 'z', "foo", 12345.67890],
     }
     client.query(query1, (err, res) => {
       if (err) {

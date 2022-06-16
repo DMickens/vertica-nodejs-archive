@@ -66,7 +66,7 @@ const enum MessageCodes {
   NoticeMessage = 0x4e, // N
   RowDescriptionMessage = 0x54, // T
   ParameterDescriptionMessage = 0x74, // t
-  commandDescriptionMessage = 0x6d, // m
+  CommandDescriptionMessage = 0x6d, // m
   PortalSuspended = 0x73, // s
   ReplicationStart = 0x57, // W
   EmptyQuery = 0x49, // I
@@ -195,7 +195,7 @@ export class Parser {
         return this.parseRowDescriptionMessage(offset, length, bytes)
       case MessageCodes.ParameterDescriptionMessage:
         return this.parseParameterDescriptionMessage(offset, length, bytes)
-      case MessageCodes.commandDescriptionMessage:
+      case MessageCodes.CommandDescriptionMessage:
         return this.parseCommandDescriptionMessage(offset, length, bytes)
       case MessageCodes.CopyIn:
         return this.parseCopyInMessage(offset, length, bytes)
@@ -256,7 +256,9 @@ export class Parser {
     this.reader.setBuffer(offset, bytes)
     const fieldCount = this.reader.int16()
     const nonNativeTypeCount = this.reader.int32()
-    // if nonNativeTypeCount > 0, error out for now
+    if (nonNativeTypeCount > 0) {
+      throw new Error("Non native types are not yet supported")
+    }
     const message = new RowDescriptionMessage(length, fieldCount)
     for (let i = 0; i < fieldCount; i++) {
       message.fields[i] = this.parseField()
@@ -271,8 +273,11 @@ export class Parser {
     const tableName = this.reader.cstring()
     const columnID = this.reader.int16()
     const parentTypeID = this.reader.int16()
-    const usesTypePool = this.reader.bytes(1)
-    const dataTypeID = this.reader.int32()
+    const isNonNative = this.reader.bytes(1)
+    if (isNonNative) {
+      throw new Error("Non native types are not yet supported")
+    }
+    const dataTypeID = this.reader.int32() // for non native types this would be the index into the type mapping pool
     const dataTypeSize = this.reader.int16()
     const allowsNull = this.reader.int16()
     const isIdentity = this.reader.int16()
@@ -285,7 +290,9 @@ export class Parser {
     this.reader.setBuffer(offset, bytes)
     const parameterCount = this.reader.int16()
     const nonNativeTypeCount = this.reader.int32() 
-    // if nonNativeTypeCount > 0, error out for now
+    if (nonNativeTypeCount > 0 ) {
+      throw new Error("Non native types are not yet supported")
+    }
     const message = new ParameterDescriptionMessage(length, parameterCount)
     for (let i = 0; i < parameterCount; i++) {
       message.parameters[i] = this.parseParameter()
@@ -295,8 +302,8 @@ export class Parser {
 
   private parseParameter(): Parameter {
     const isNonNative = this.reader.byte() !== 0
-    if (isNonNative) {
-      //error
+    if (isNonNative) { // should have been caught already, but just in case
+      throw new Error("Non native types are not yet supported")
     }
     const oid = this.reader.int32()
     const typemod = this.reader.int32()

@@ -462,7 +462,6 @@ class Client extends EventEmitter {
 
   _handlePortalSuspended(msg) {
     // [VERTICA specific] PortalSuspended replaced CommandComplete to indicate completion of the source SQL command
-    // Handle portalSuspended the same way commandComplete is handled
     this.activeQuery.handlePortalSuspended(msg, this.connection)
   }
 
