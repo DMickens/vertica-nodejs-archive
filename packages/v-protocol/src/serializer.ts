@@ -122,7 +122,7 @@ const paramWriter = new Writer()
 
 // make this a const enum so typescript will inline the value
 const enum ParamType {
-  STRING = 0,
+  TEXT = 0,
   BINARY = 1,
 }
 
@@ -152,28 +152,22 @@ const bind = (config: BindOpts = {}): Buffer => {
   const parameterCount = values.length
   const dataTypeIDs = config.dataTypeIDs || emptyArray
   writer.addCString(portal).addCString(statement)
-
   // [VERTICA specific] The parameter format codes need to be added up front instead of being interleaved with the parameter values
   // parameter format codes.
 
-  writer.addInt16(0) // tell the server that all parameter format codes from the driver will be text
-
+  writer.addInt16(0) // tell the server that all parameter format codes from the driver will be default, text
   writer.addInt16(parameterCount) // number of parameters, must match number needed by query
-
   // [VERTICA specific] The type OIDs need to be added here
   // OIDs
   for (let i = 0; i < parameterCount; i++) {
     writer.addInt32(dataTypeIDs[i])
   }
 
-  // parameter values
-  for (let i = 0; i < parameterCount; i++) {
-    writer.addInt32(values[i].length + 1)
-    writer.addCString(values[i])
-  }
+  writeValues(values, config.valueMapper)
+  writer.add(paramWriter.flush())
 
   // result format codes
-  // binary transfer not supported, will all be text all the time
+  // binary transfer not supported, will all be default, text all the time
   writer.addInt16(0)
 
   return writer.flush(code.bind)
