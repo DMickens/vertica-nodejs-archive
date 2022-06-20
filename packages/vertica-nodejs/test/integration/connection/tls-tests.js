@@ -4,7 +4,10 @@ var vertica = helper.vertica
 
 var suite = new helper.Suite()
 var tls = require('tls')
-const { tls_trusted_certs } = require('../../../lib/defaults')
+
+const trusted_certs_path  =  __dirname + '/../../tls/ca_cert.pem'
+const client_cert_path    =  __dirname + '/../../tls/client_cert.pem'
+const client_key_path     =  __dirname + '/../../tls/client_key.pem'
 
 /*
 * Summary of istructions for configuring your test server to support connections under desired TLS mode.
@@ -28,7 +31,7 @@ const { tls_trusted_certs } = require('../../../lib/defaults')
 *       "ALTER TLS CONFIGURATION server TLSMODE '[ENABLE|DISABLE|TRY_VERIFY|VERIFY_CA]'"
 */
 
-/*
+
 // Test case for tls_mode = 'disable'
 // The server, in server or mutual mode (enable, disable, try_verify, verify_ca), will accept 
 // all connections from the client, the caveat being that for try_verify and verify_ca it's possible
@@ -111,7 +114,7 @@ suite.test('vertica tls - verify-ca - no tls_trusted_certs specified', function 
 // by a CA that we trust, verify any failures are due to one of these reasons
 suite.test('vertica tls - verify-ca - valid server certificate', function () {
   var client = new vertica.Client({tls_mode: 'verify-ca',
-                                   tls_trusted_certs: __dirname + '/../../tls/ca_cert.pem'}) 
+                                   tls_trusted_certs: trusted_certs_path}) 
   assert.equal(client.tls_mode, 'verify-ca')
   client.connect(err => {
     if (err) {
@@ -156,7 +159,7 @@ suite.test('vertica tls - verify-full - no tls_trusted_certs specified', functio
 // each server mode, the only difference is logic in the client handling checking the certificate
 suite.test('vertica tls - verify-full - valid server certificate', function () {
   var client = new vertica.Client({tls_mode: 'verify-full',
-                                   tls_trusted_certs: __dirname + '/../../tls/ca_cert.pem'}) 
+                                   tls_trusted_certs: trusted_certs_path}) 
   assert.equal(client.tls_mode, 'verify-full')
   client.connect(err => {
     if (err) {
@@ -175,7 +178,7 @@ suite.test('vertica tls - verify-full - valid server certificate', function () {
       client.end()
     })
   })
-})*/
+})
 
 // MUTUAL MODE TESTS
 
@@ -184,11 +187,11 @@ suite.test('vertica tls - verify-full - valid server certificate', function () {
 // the name on the certificate that the server gave us during the TLS handshake. For this test, nothing different
 // needs to be done or asserted except for using the verify-full tls mode. The behavior should be the same for 
 // each server mode, the only difference is logic in the client handling checking the certificate
-suite.test('vertica tls - verify-full - valid server certificate', function () {
+/*suite.test('vertica tls - verify-full - valid server certificate', function () {
   var client = new vertica.Client({tls_mode: 'require',
-                                   tls_trusted_certs: __dirname + '/../../tls/ca_cert.pem',
-                                   tls_client_cert: __dirname + '/../../tls/client_cert.pem',
-                                   tls_client_key: __dirname + '/../../tls/client_key.pem'}) 
+                                   tls_trusted_certs: trusted_certs_path,
+                                   tls_client_cert: client_cert_path,
+                                   tls_client_key: client_key_path}) 
   assert.equal(client.tls_mode, 'require')
   client.connect(err => {
     if (err) {
@@ -209,4 +212,4 @@ suite.test('vertica tls - verify-full - valid server certificate', function () {
       client.end()
     })
   })
-})
+})*/

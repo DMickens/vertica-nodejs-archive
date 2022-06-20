@@ -82,6 +82,7 @@ class ConnectionParameters {
 
     this.tls_mode = val('tls_mode', config)
     this.tls_client_cert = val('tls_client_cert', config)
+    this.tls_client_key = val('tls_client_key', config)
     this.tls_trusted_certs = val('tls_trusted_certs', config)
     this.client_encoding = val('client_encoding', config)
     this.replication = val('replication', config)

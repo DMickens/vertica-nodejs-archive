@@ -57,6 +57,7 @@ class Client extends EventEmitter {
         tls_mode: this.connectionParameters.tls_mode,
         tls_trusted_certs: this.connectionParameters.tls_trusted_certs,
         tls_client_cert: this.connectionParameters.tls_client_cert,
+        tls_client_key: this.connectionParameters.tls_client_key,
         keepAlive: c.keepAlive || false,
         keepAliveInitialDelayMillis: c.keepAliveInitialDelayMillis || 0,
         encoding: this.connectionParameters.client_encoding || 'utf8',
@@ -68,6 +69,7 @@ class Client extends EventEmitter {
     this.secretKey = null
     this.tls_mode = this.connectionParameters.tls_mode || 'disable'
     this.tls_client_cert = this.connectionParameters.tls_client_cert
+    this.tls_client_key = this.connectionParameters.tls_client_key
     this.tls_trusted_certs = this.connectionParameters.tls_trusted_certs
     this._connectionTimeoutMillis = c.connectionTimeoutMillis || 0
   }
